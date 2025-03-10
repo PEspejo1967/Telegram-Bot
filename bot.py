@@ -1,42 +1,40 @@
-import os
 import logging
+import os
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 
-# Configurar el logging para ver mensajes en la consola
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
+# Configurar el logging
+logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Obtener el token desde la variable de entorno
-TOKEN = "7626661581:AAEP4q1QAvsprXh-WMTNew1-UYtdBqmxWmU"
+# Obtener el TOKEN desde el entorno (asegúrate de que está configurado correctamente)
+TOKEN = os.getenv("TOKEN")
 
-# Verificar que el token existe
 if not TOKEN:
-    logger.error("El TOKEN no está configurado correctamente.")
+    print("El TOKEN no está configurado correctamente.")
     exit(1)
 
-# Función para responder al comando /start
+# Función de inicio para responder al comando /start
 async def start(update: Update, context: CallbackContext) -> None:
-    await update.message.reply_text("¡Hola! Soy un bot de Telegram funcionando en Render 🚀.")
+    user_name = update.message.from_user.first_name  # Obtener el nombre del usuario
+    welcome_message = f"¡Hola {user_name}! Bienvenido a nuestro servicio. ¿En qué puedo ayudarte hoy?"
+    await update.message.reply_text(welcome_message)
 
-# Función para responder mensajes de texto
-async def echo(update: Update, context: CallbackContext) -> None:
-    await update.message.reply_text(f"Has dicho: {update.message.text}")
+# Función para responder automáticamente a cualquier mensaje
+async def auto_reply(update: Update, context: CallbackContext) -> None:
+    user_name = update.message.from_user.first_name  # Obtener el nombre del usuario
+    response_message = f"Hola {user_name}, gracias por contactarnos. Estoy aquí para ayudarte. ¿Cómo puedo asistirte hoy?"
+    await update.message.reply_text(response_message)
 
-# Configurar la aplicación de Telegram
-def main():
-    app = Application.builder().token(TOKEN).build()
+# Crear la aplicación de Telegram con el TOKEN
+application = Application.builder().token(TOKEN).build()
 
-    # Agregar manejadores de comandos y mensajes
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+# Agregar el handler para el comando /start
+application.add_handler(CommandHandler("start", start))
 
-    # Iniciar el bot
-    logger.info("Bot en funcionamiento...")
-    app.run_polling()
+# Agregar el handler para todos los mensajes de texto (no comandos)
+application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, auto_reply))
 
 # Ejecutar el bot
 if __name__ == "__main__":
-    main()
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
