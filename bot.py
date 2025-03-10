@@ -3,14 +3,14 @@ import logging
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 
-# Configurar el logging para ver mensajes en la consola de Render
+# Configurar el logging para ver mensajes en la consola
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
 # Obtener el token desde la variable de entorno
-TOKEN = os.getenv("7626661581:AAEP4q1QAvsprXh-WMTNew1-UYtdBqmxWmU")
+TOKEN = 7626661581:AAEP4q1QAvsprXh-WMTNew1-UYtdBqmxWmU
 
 # Verificar que el token existe
 if not TOKEN:
