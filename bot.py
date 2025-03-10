@@ -1,7 +1,9 @@
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 
-TOKEN = "7626661581:AAEP4q1QAvsprXh-WMTNew1-UYtdBqmxWmU"
+import os
+
+TOKEN = os.getenv("7626661581:AAEP4q1QAvsprXh-WMTNew1-UYtdBqmxWmU")  # Obtiene el token desde Railway
 
 async def start(update: Update, context: CallbackContext):
     """Responde cuando el usuario inicia una conversación con /start."""
