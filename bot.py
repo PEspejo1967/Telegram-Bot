@@ -10,7 +10,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Obtener el token desde la variable de entorno
-TOKEN = 7626661581:AAEP4q1QAvsprXh-WMTNew1-UYtdBqmxWmU
+TOKEN = "7626661581:AAEP4q1QAvsprXh-WMTNew1-UYtdBqmxWmU"
 
 # Verificar que el token existe
 if not TOKEN:
