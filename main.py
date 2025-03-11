@@ -42,6 +42,7 @@ async def main():
             # Si el mensaje no es de ti, el bot responde automáticamente
             if event.sender_id != me.id:  # Si el mensaje no es de ti
                 await event.respond(mensaje_auto)
+                await event.respond(mensaje_modificado)
             else:
                 # Si es un mensaje tuyo (estás enviando), agregar el nombre del equipo
                 mensaje_modificado = f"Este mensaje fue enviado desde el equipo: {nombre_equipo}. {event.message.text}"
