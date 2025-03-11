@@ -30,10 +30,13 @@ async def main():
         if event.is_private:
             sender = await event.get_sender()
             print(f"📩 Mensaje recibido de {sender.first_name}")
-            await event.respond(mensaje_auto)
+            
+            # Verificar si el cliente está conectado
+            if not client.is_connected():
+                # Si no está conectado, responde con el mensaje automático
+                await event.respond(mensaje_auto)
 
     await client.run_until_disconnected()
 
 asyncio.run(main())
-
 
