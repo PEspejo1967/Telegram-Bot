@@ -9,16 +9,17 @@ api_hash = "fc0c129e052be978536a586d60f05dbf"
 client = TelegramClient("fabrica_session", api_id, api_hash)
 
 # Mensajes automáticos
-mensaje_fuera_de_horario = "¡Hola! 👋  
+mensaje_fuera_de_horario = """¡Hola! 👋
 
-Gracias por escribirnos a P. Espejo. Actualmente, estamos fuera de nuestro horario laboral, pero hemos recibido tu mensaje y lo atenderemos en cuanto volvamos a estar disponibles.  
+Gracias por escribirnos a P. Espejo. Actualmente, estamos fuera de nuestro horario laboral, pero hemos recibido tu mensaje y lo atenderemos en cuanto volvamos a estar disponibles.
 
-Nuestro horario de atención es:  
-- *Lunes a jueves*: 9:00h a 13:00h y 15:30h a 18:30h.  
+Nuestro horario de atención es:
+- *Lunes a jueves*: 9:00h a 13:00h y 15:30h a 18:30h.
 - *Viernes*: 8:00h a 14:00h.
 
-Te responderemos a la brevedad posible dentro de estos horarios. ¡Gracias por tu comprensión! Que tengas un excelente día. 😊"
-mensaje_fuera_de_linea = "Hola! 👋
+Te responderemos a la brevedad posible dentro de estos horarios. ¡Gracias por tu comprensión! Que tengas un excelente día. 😊"""
+
+mensaje_fuera_de_linea = """Hola! 👋
 
 Gracias por contactarnos. Nos pondremos en contacto contigo lo antes posible.
 - *Ainoha Ortega*: ainoha@grupoespejo.net
@@ -29,7 +30,7 @@ Gracias por contactarnos. Nos pondremos en contacto contigo lo antes posible.
 - *Rafael Gutiérrez*: rafa@grupoespejo.net
 - *María Dolores*: mariadolores@grupoespejo.net
 
-¡Que tengas un excelente día! 😊"
+¡Que tengas un excelente día! 😊"""
 
 
 
