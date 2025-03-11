@@ -1,5 +1,6 @@
 from telethon import TelegramClient, events
 import asyncio
+import socket 
 
 # No necesitas ingresar manualmente el número, solo usa el archivo de sesión
 api_id = 26404425
