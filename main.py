@@ -30,25 +30,24 @@ async def main():
     await client.start()  # Carga la sesión guardada
     print("✅ Bot iniciado correctamente.")
 
-    # Obtener tu información (id) para usarla en la comparación
+    # Obtener tu información (id) para identificarte
     me = await client.get_me()
 
-    @client.on(events.NewMessage(incoming=True))
-    async def handler(event):
+    @client.on(events.NewMessage(outgoing=True))  # Mensajes enviados por ti
+    async def handler_outgoing(event):
+        # Modificar el mensaje para incluir el nombre del equipo
+        mensaje_modificado = f"{event.message.text} (Enviado desde: {nombre_equipo})"
+        await event.edit(mensaje_modificado)  # Editamos el mensaje original
+
+    @client.on(events.NewMessage(incoming=True))  # Mensajes recibidos
+    async def handler_incoming(event):
         if event.is_private:
             sender = await event.get_sender()
             print(f"📩 Mensaje recibido de {sender.first_name}")
             
-            # Si el mensaje no es de ti, el bot responde automáticamente
-            if event.sender_id != me.id:  # Si el mensaje no es de ti
+            # Si el mensaje no es de ti, responde automáticamente
+            if event.sender_id != me.id:
                 await event.respond(mensaje_auto)
-                await event.respond(mensaje_modificado)
-            else:
-                # Si es un mensaje tuyo (estás enviando), agregar el nombre del equipo
-                mensaje_modificado = f"Este mensaje fue enviado desde el equipo: {nombre_equipo}. {event.message.text}"
-                
-                # Responder con el mensaje modificado
-                await event.respond(mensaje_modificado)
 
     await client.run_until_disconnected()
 
