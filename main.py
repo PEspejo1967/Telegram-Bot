@@ -2,8 +2,8 @@ from telethon import TelegramClient, events
 import asyncio
 
 # No necesitas ingresar manualmente el número, solo usa el archivo de sesión
-api_id = TU_API_ID
-api_hash = "TU_API_HASH"
+api_id = 26404425
+api_hash = "fc0c129e052be978536a586d60f05dbf"
 
 # Cargar sesión previamente creada
 client = TelegramClient("fabrica_session", api_id, api_hash)
