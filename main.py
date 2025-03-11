@@ -1,19 +1,14 @@
 from telethon import TelegramClient, events
 import asyncio
-import datetime
 
-# Mensajes automáticos
-mensaje_fuera_de_horario = """¡Hola! 👋
+# No necesitas ingresar manualmente el número, solo usa el archivo de sesión
+api_id = TU_API_ID
+api_hash = "TU_API_HASH"
 
-Gracias por escribirnos a P. Espejo. Actualmente, estamos fuera de nuestro horario laboral, pero hemos recibido tu mensaje y lo atenderemos en cuanto volvamos a estar disponibles.
+# Cargar sesión previamente creada
+client = TelegramClient("fabrica_session", api_id, api_hash)
 
-Nuestro horario de atención es:
-- *Lunes a jueves*: 9:00h a 13:00h y 15:30h a 18:30h.
-- *Viernes*: 8:00h a 14:00h.
-
-Te responderemos a la brevedad posible dentro de estos horarios. ¡Gracias por tu comprensión! Que tengas un excelente día. 😊"""
-
-mensaje_fuera_de_linea = """Hola! 👋
+mensaje_auto = """Hola! 👋
 
 Gracias por contactarnos. Nos pondremos en contacto contigo lo antes posible.
 - *Ainoha Ortega*: ainoha@grupoespejo.net
@@ -26,53 +21,19 @@ Gracias por contactarnos. Nos pondremos en contacto contigo lo antes posible.
 
 ¡Que tengas un excelente día! 😊"""
 
-# Coloca aquí tus credenciales API
-api_id = 26404425
-api_hash = "fc0c129e052be978536a586d60f05dbf"
-
-# Función para comprobar si estamos dentro del horario de oficina
-def dentro_de_horario():
-    ahora = datetime.datetime.now()
-    dia = ahora.weekday()
-    hora = ahora.hour
-    minuto = ahora.minute
-
-    # Lunes a jueves: 9:00h a 13:00h y 15:30h a 18:30h
-    if dia in [0, 1, 2, 3]:  # Lunes a jueves
-        if (9 <= hora < 13) or (15 <= hora < 18) or (hora == 13 and minuto == 0) or (hora == 18 and minuto == 30):
-            return True
-    # Viernes: 8:00h a 14:00h
-    if dia == 4:  # Viernes
-        if 8 <= hora < 14:
-            return True
-    return False
-
 async def main():
-    # Iniciar cliente con la sesión de fabrica_session
-    client = TelegramClient("fabrica_session", api_id, api_hash)
+    await client.start()  # Carga la sesión guardada
+    print("✅ Bot iniciado correctamente.")
 
-    await client.start()  # Esto usará la sesión existente en "fabrica_session.session"
-
-    # Escuchar mensajes privados recibidos
     @client.on(events.NewMessage(incoming=True))
     async def handler(event):
-        # Verificar que sea un mensaje de un usuario y no de un grupo
         if event.is_private:
             sender = await event.get_sender()
-            print(f"Mensaje recibido de {sender.first_name}")
-            
-            if dentro_de_horario():
-                # Enviar mensaje si estamos dentro del horario y no estamos en línea
-                if not client.is_connected():
-                    await event.respond(mensaje_fuera_de_linea)
-            else:
-                # Enviar mensaje fuera de horario
-                await event.respond(mensaje_fuera_de_horario)
+            print(f"📩 Mensaje recibido de {sender.first_name}")
+            await event.respond(mensaje_auto)
 
-    print("Esperando mensajes...")
     await client.run_until_disconnected()
 
 asyncio.run(main())
-
 
 
