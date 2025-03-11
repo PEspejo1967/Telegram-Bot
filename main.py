@@ -8,6 +8,10 @@ api_hash = "fc0c129e052be978536a586d60f05dbf"
 # Cargar sesión previamente creada
 client = TelegramClient("fabrica_session", api_id, api_hash)
 
+# Obtener el nombre del equipo donde se está ejecutando el bot
+nombre_equipo = socket.gethostname()
+
+# Mensajes automáticos
 mensaje_auto = """Hola! 👋
 
 Gracias por contactarnos. Nos pondremos en contacto contigo lo antes posible.
@@ -21,8 +25,6 @@ Gracias por contactarnos. Nos pondremos en contacto contigo lo antes posible.
 
 ¡Que tengas un excelente día! 😊"""
 
-mensaje_prueba ="si estoy online"
-
 async def main():
     await client.start()  # Carga la sesión guardada
     print("✅ Bot iniciado correctamente.")
@@ -33,14 +35,16 @@ async def main():
             sender = await event.get_sender()
             print(f"📩 Mensaje recibido de {sender.first_name}")
             
-            await event.respond(mensaje_prueba)
-            
-            # Verificar si el cliente está conectado
-            if not client.is_connected():
-            # Si no está conectado, responde con el mensaje automático
-            await event.respond(mensaje_auto)
+            # Si no estás conectado, el bot responderá automáticamente con el mensaje
+            if event.sender_id != client.sender_id:  # Si el mensaje no es de ti
+                await event.respond(mensaje_auto)
+            else:
+                # Si es un mensaje tuyo (estás enviando), agregar el nombre del equipo
+                mensaje_modificado = f"Este mensaje fue enviado desde el equipo: {nombre_equipo}. {event.message.text}"
+                
+                # Responder con el mensaje modificado
+                await event.respond(mensaje_modificado)
 
     await client.run_until_disconnected()
 
 asyncio.run(main())
-
