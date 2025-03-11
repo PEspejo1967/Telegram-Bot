@@ -1,12 +1,6 @@
 from telethon import TelegramClient, events
 import asyncio
-
-# No necesitas ingresar manualmente el número, solo usa el archivo de sesión
-api_id = 26404425
-api_hash = "fc0c129e052be978536a586d60f05dbf"
-
-# Cargar sesión previamente creada
-client = TelegramClient("fabrica_session", api_id, api_hash)
+import datetime
 
 # Mensajes automáticos
 mensaje_fuera_de_horario = """¡Hola! 👋
@@ -32,8 +26,9 @@ Gracias por contactarnos. Nos pondremos en contacto contigo lo antes posible.
 
 ¡Que tengas un excelente día! 😊"""
 
-
-
+# Coloca aquí tus credenciales API
+api_id = 26404425
+api_hash = "fc0c129e052be978536a586d60f05dbf"
 
 # Función para comprobar si estamos dentro del horario de oficina
 def dentro_de_horario():
@@ -53,10 +48,10 @@ def dentro_de_horario():
     return False
 
 async def main():
-    # Iniciar cliente con sesión de tu cuenta
+    # Iniciar cliente con la sesión de fabrica_session
     client = TelegramClient("fabrica_session", api_id, api_hash)
 
-    await client.start(phone_number)
+    await client.start()  # Esto usará la sesión existente en "fabrica_session.session"
 
     # Escuchar mensajes privados recibidos
     @client.on(events.NewMessage(incoming=True))
@@ -78,3 +73,6 @@ async def main():
     await client.run_until_disconnected()
 
 asyncio.run(main())
+
+
+
