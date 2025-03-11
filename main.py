@@ -21,6 +21,8 @@ Gracias por contactarnos. Nos pondremos en contacto contigo lo antes posible.
 
 ¡Que tengas un excelente día! 😊"""
 
+mensaje_prueba ="si estoy online"
+
 async def main():
     await client.start()  # Carga la sesión guardada
     print("✅ Bot iniciado correctamente.")
@@ -31,10 +33,12 @@ async def main():
             sender = await event.get_sender()
             print(f"📩 Mensaje recibido de {sender.first_name}")
             
+            await event.respond(mensaje_prueba)
+            
             # Verificar si el cliente está conectado
             if not client.is_connected():
-                # Si no está conectado, responde con el mensaje automático
-                await event.respond(mensaje_auto)
+            # Si no está conectado, responde con el mensaje automático
+            await event.respond(mensaje_auto)
 
     await client.run_until_disconnected()
 
