@@ -1,6 +1,8 @@
 from telethon import TelegramClient, events
 import asyncio
 import datetime
+import requests
+import time
 
 # Configuración del cliente de Telegram
 api_id = 26404425
@@ -9,9 +11,12 @@ api_hash = "fc0c129e052be978536a586d60f05dbf"
 # Cargar sesión previamente creada
 client = TelegramClient("fabrica_session", api_id, api_hash)
 
-# Mapeo de IDs de usuario a nombres de equipo o persona
-usuarios_telegram = {
-    529061298: "Valcárcel"
+# Diccionario de etiquetas por equipo
+etiquetas_por_equipo = {
+    "1": "Ainoha Ortega",
+    "2": "Daniel Ortega️",
+    "3": "Nuria Ortega",
+    "4": "Ana Paula Montes"
 }
 
 # Mensajes automáticos
@@ -54,6 +59,17 @@ def esta_fuera_de_horario():
 
     return True  # Fuera de horario
 
+# Función para enviar un "ping" cada cierto tiempo para mantener vivo el bot
+def keep_alive():
+    while True:
+        try:
+            # Aquí puedes usar un endpoint de un servicio web para mantener vivo el bot
+            requests.get("https://tu-servicio.com")  # Cambia por tu URL
+            print("🔄 Ping enviado para mantener vivo el bot.")
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Error enviando ping: {e}")
+        time.sleep(60 * 10)  # Enviar ping cada 10 minutos
+
 async def main():
     await client.start()
     print("✅ Bot iniciado en Render.")
@@ -62,11 +78,13 @@ async def main():
 
     @client.on(events.NewMessage(outgoing=True))  # Mensajes enviados manualmente
     async def handler_outgoing(event):
-        sender_id = event.sender_id
-        nombre_usuario = usuarios_telegram.get(sender_id, "PC-DESCONOCIDO")
-        
-        mensaje_modificado = f"{event.message.text} (Enviado desde: {nombre_usuario})"
-        await event.edit(mensaje_modificado)  # Edita el mensaje para incluir el equipo
+        sender = await event.get_sender()
+        # Asigna la etiqueta por defecto si no hay un equipo asignado
+        equipo = getattr(sender, 'username', 'PC-DESCONOCIDO')  # Nombre de usuario, si está disponible
+        etiqueta = etiquetas_por_equipo.get(equipo, "💻")  # Obtiene la etiqueta para el equipo
+
+        mensaje_modificado = f"{etiqueta} {event.message.text} (Enviado desde: {equipo})"
+        await event.edit(mensaje_modificado)  # Edita el mensaje para incluir el equipo y la etiqueta
 
     @client.on(events.NewMessage(incoming=True))  # Mensajes entrantes
     async def handler_incoming(event):
@@ -79,6 +97,10 @@ async def main():
                     await event.respond(mensaje_fuera_de_horario)
                 else:
                     await event.respond(mensaje_auto)
+
+    # Ejecuta el keep-alive en un hilo separado para que no bloquee el bot
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, keep_alive)
 
     await client.run_until_disconnected()
 
