@@ -1,9 +1,9 @@
 from telethon import TelegramClient, events
 import asyncio
 import datetime
-import requests
-import time
-import re
+import uvicorn
+import threading
+from fastapi import FastAPI
 
 # Configuración del cliente de Telegram
 api_id = 26404425
@@ -60,17 +60,6 @@ def esta_fuera_de_horario():
 
     return True  # Fuera de horario
 
-# Función para enviar un "ping" cada cierto tiempo para mantener vivo el bot
-def keep_alive():
-    while True:
-        try:
-            # Aquí puedes usar un endpoint de un servicio web para mantener vivo el bot
-            requests.get("https://www.render.com")  # Cambia por tu URL
-            print("🔄 Ping enviado para mantener vivo el bot.")
-        except requests.exceptions.RequestException as e:
-            print(f"❌ Error enviando ping: {e}")
-        time.sleep(60 * 10)  # Enviar ping cada 10 minutos
-
 async def main():
     await client.start()
     print("✅ Bot iniciado en Render.")
@@ -79,16 +68,11 @@ async def main():
 
     @client.on(events.NewMessage(outgoing=True))  # Mensajes enviados manualmente
     async def handler_outgoing(event):
-        sender = await event.get_sender()
-
-        # Verificar si el mensaje es automático
-        if event.message.text not in [mensaje_auto, mensaje_fuera_de_horario]:
-            # Asigna la etiqueta por defecto si no hay un equipo asignado
-            equipo = getattr(sender, 'username', 'PC-DESCONOCIDO')  # Nombre de usuario, si está disponible
-            etiqueta = etiquetas_por_equipo.get(equipo)  # Obtiene la etiqueta para el equipo
-
-            mensaje_modificado = f"{etiqueta} {event.message.text} (primero: {equipo})"
-            await event.edit(mensaje_modificado)  # Edita el mensaje para incluir el equipo y la etiqueta
+        sender_id = event.sender_id
+        nombre_usuario = etiquetas_por_equipo.get(str(sender_id), "PC-DESCONOCIDO")
+        
+        mensaje_modificado = f"{event.message.text} (Enviado desde: {nombre_usuario})"
+        await event.edit(mensaje_modificado)  # Edita el mensaje para incluir el equipo
 
     @client.on(events.NewMessage(incoming=True))  # Mensajes entrantes
     async def handler_incoming(event):
@@ -100,20 +84,23 @@ async def main():
                 if esta_fuera_de_horario():
                     await event.respond(mensaje_fuera_de_horario)
                 else:
-                    # Buscar el hashtag en el mensaje
-                    match = re.search(r"#(\d+)", event.message.text)  # Busca el hashtag seguido de números
-                    if match:
-                        equipo_numero = match.group(1)  # Obtiene el número del hashtag
-                        etiqueta = etiquetas_por_equipo.get(equipo_numero, "Equipo desconocido")
-                        mensaje_con_etiqueta = f"{etiqueta}: {event.message.text}"
-                        await event.respond(mensaje_con_etiqueta)
-                    else:
-                        await event.respond(mensaje_auto)
-
-    # Ejecuta el keep-alive en un hilo separado para que no bloquee el bot
-    loop = asyncio.get_event_loop()
-    loop.run_in_executor(None, keep_alive)
+                    await event.respond(mensaje_auto)
 
     await client.run_until_disconnected()
 
+# 🚀 Servidor FastAPI para UptimeRobot
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"status": "Bot activo 🚀"}
+
+# Ejecutar el servidor en un hilo separado
+def run_server():
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+server_thread = threading.Thread(target=run_server, daemon=True)
+server_thread.start()
+
+# Ejecutar el bot
 asyncio.run(main())
