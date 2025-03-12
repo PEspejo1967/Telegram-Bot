@@ -1,6 +1,5 @@
 from telethon import TelegramClient, events
 import asyncio
-import socket
 import datetime
 
 # Configuración del cliente de Telegram
@@ -10,8 +9,10 @@ api_hash = "fc0c129e052be978536a586d60f05dbf"
 # Cargar sesión previamente creada
 client = TelegramClient("fabrica_session", api_id, api_hash)
 
-# Obtener el nombre del equipo donde se está ejecutando el bot
-nombre_equipo = socket.gethostname()
+# Mapeo de IDs de usuario a nombres de equipo o persona
+usuarios_telegram = {
+    529061298: "Valcárcel"
+}
 
 # Mensajes automáticos
 mensaje_fuera_de_horario = """¡Hola! 👋  
@@ -37,7 +38,7 @@ Gracias por contactarnos. Nos pondremos en contacto contigo lo antes posible.
 
 ¡Que tengas un excelente día! 😊"""
 
-# Función para verificar si estamos dentro del horario laboral
+# Función para verificar si estamos fuera del horario laboral
 def esta_fuera_de_horario():
     ahora = datetime.datetime.now()
     dia_semana = ahora.weekday()  # Lunes = 0, Domingo = 6
@@ -54,23 +55,25 @@ def esta_fuera_de_horario():
     return True  # Fuera de horario
 
 async def main():
-    await client.start()  # Carga la sesión guardada
-    print("✅ Bot iniciado correctamente.")
+    await client.start()
+    print("✅ Bot iniciado en Render.")
 
     me = await client.get_me()
 
-    @client.on(events.NewMessage(outgoing=True))  # Mensajes enviados por ti
+    @client.on(events.NewMessage(outgoing=True))  # Mensajes enviados manualmente
     async def handler_outgoing(event):
-        mensaje_modificado = f"{event.message.text} (Enviado desde: {nombre_equipo})"
-        await event.edit(mensaje_modificado)
+        sender_id = event.sender_id
+        nombre_usuario = usuarios_telegram.get(sender_id, "PC-DESCONOCIDO")
+        
+        mensaje_modificado = f"{event.message.text} (Enviado desde: {nombre_usuario})"
+        await event.edit(mensaje_modificado)  # Edita el mensaje para incluir el equipo
 
-    @client.on(events.NewMessage(incoming=True))  # Mensajes recibidos
+    @client.on(events.NewMessage(incoming=True))  # Mensajes entrantes
     async def handler_incoming(event):
         if event.is_private:
             sender = await event.get_sender()
             print(f"📩 Mensaje recibido de {sender.first_name}")
-            
-            # Si el mensaje no es tuyo
+
             if event.sender_id != me.id:
                 if esta_fuera_de_horario():
                     await event.respond(mensaje_fuera_de_horario)
