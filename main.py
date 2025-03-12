@@ -81,7 +81,7 @@ async def main():
         sender = await event.get_sender()
         # Asigna la etiqueta por defecto si no hay un equipo asignado
         equipo = getattr(sender, 'username', 'PC-DESCONOCIDO')  # Nombre de usuario, si está disponible
-        etiqueta = etiquetas_por_equipo.get(equipo, "💻")  # Obtiene la etiqueta para el equipo
+        etiqueta = etiquetas_por_equipo.get(equipo)  # Obtiene la etiqueta para el equipo
 
         mensaje_modificado = f"{etiqueta} {event.message.text} (Enviado desde: {equipo})"
         await event.edit(mensaje_modificado)  # Edita el mensaje para incluir el equipo y la etiqueta
