@@ -64,7 +64,7 @@ def keep_alive():
     while True:
         try:
             # Aquí puedes usar un endpoint de un servicio web para mantener vivo el bot
-            requests.get("https://tu-servicio.com")  # Cambia por tu URL
+            requests.get("https://www.render.com")  # Cambia por tu URL
             print("🔄 Ping enviado para mantener vivo el bot.")
         except requests.exceptions.RequestException as e:
             print(f"❌ Error enviando ping: {e}")
