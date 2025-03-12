@@ -3,6 +3,7 @@ import asyncio
 import datetime
 import requests
 import time
+import re  # Para trabajar con expresiones regulares
 
 # Configuración del cliente de Telegram
 api_id = 26404425
@@ -96,7 +97,15 @@ async def main():
                 if esta_fuera_de_horario():
                     await event.respond(mensaje_fuera_de_horario)
                 else:
-                    await event.respond(mensaje_auto)
+                    # Buscar el hashtag en el mensaje
+                    match = re.search(r"#(\d+)", event.message.text)  # Busca el hashtag seguido de números
+                    if match:
+                        equipo_numero = match.group(1)  # Obtiene el número del hashtag
+                        etiqueta = etiquetas_por_equipo.get(equipo_numero, "Equipo desconocido")
+                        mensaje_con_etiqueta = f"{etiqueta}: {event.message.text}"
+                        await event.respond(mensaje_con_etiqueta)
+                    else:
+                        await event.respond(mensaje_auto)
 
     # Ejecuta el keep-alive en un hilo separado para que no bloquee el bot
     loop = asyncio.get_event_loop()
