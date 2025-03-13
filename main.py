@@ -32,7 +32,10 @@ etiquetas_por_equipo = {
     "1": "Ainoha Ortega",
     "2": "Daniel Ortega️",
     "3": "Nuria Ortega",
-    "4": "Ana Paula Montes"
+    "4": "Ana Paula Montes",
+    "5": "Manuel Ibáñez",
+    "6": "Rafael Gutiérrez",
+    "7": "María Dolores"    
 }
 
 # Mensajes automáticos
@@ -58,6 +61,9 @@ Gracias por contactarnos. Nos pondremos en contacto contigo lo antes posible.
 - *María Dolores*: mariadolores@grupoespejo.net
 
 ¡Que tengas un excelente día! 😊"""
+
+# Diccionario para registrar la última vez que se envió el mensaje automático a cada usuario
+ultima_interaccion = {}
 
 # Función para verificar si estamos fuera del horario laboral
 def esta_fuera_de_horario():
@@ -104,13 +110,21 @@ async def main():
     async def handler_incoming(event):
         if event.is_private:
             sender = await event.get_sender()
+            sender_id = event.sender_id
             print(f"📩 Mensaje recibido de {sender.first_name}")
 
             if event.sender_id != me.id:
-                if esta_fuera_de_horario():
-                    await event.respond(mensaje_fuera_de_horario)
-                else:
-                    await event.respond(mensaje_auto)
+                hoy = datetime.datetime.now().strftime("%Y-%m-%d")  # Fecha en formato YYYY-MM-DD
+
+                # Verificar si el usuario ya recibió el mensaje hoy
+                if sender_id not in ultima_interaccion or ultima_interaccion[sender_id] != hoy:
+                    if esta_fuera_de_horario():
+                        await event.respond(mensaje_fuera_de_horario)
+                    else:
+                        await event.respond(mensaje_auto)
+                    
+                    # Guardar la fecha de última interacción
+                    ultima_interaccion[sender_id] = hoy
 
     await client.run_until_disconnected()
 
