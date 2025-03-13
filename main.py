@@ -1,9 +1,10 @@
 from telethon import TelegramClient, events
 import asyncio
 import datetime
+import re
+from fastapi import FastAPI
 import uvicorn
 import threading
-from fastapi import FastAPI
 
 # Configuración del cliente de Telegram
 api_id = 26404425
@@ -11,6 +12,20 @@ api_hash = "fc0c129e052be978536a586d60f05dbf"
 
 # Cargar sesión previamente creada
 client = TelegramClient("fabrica_session", api_id, api_hash)
+
+# Servidor FastAPI para UptimeRobot
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"status": "Bot activo 🚀"}
+
+# Ejecutar el servidor en un hilo separado
+def run_server():
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+server_thread = threading.Thread(target=run_server, daemon=True)
+server_thread.start()
 
 # Diccionario de etiquetas por equipo
 etiquetas_por_equipo = {
@@ -66,15 +81,26 @@ async def main():
 
     me = await client.get_me()
 
-    @client.on(events.NewMessage(outgoing=True))  # Mensajes enviados manualmente
+    # Escuchar mensajes enviados por empleados
+    @client.on(events.NewMessage(outgoing=True))  
     async def handler_outgoing(event):
-        sender_id = event.sender_id
-        nombre_usuario = etiquetas_por_equipo.get(str(sender_id), "PC-DESCONOCIDO")
-        
-        mensaje_modificado = f"{event.message.text} (Enviado desde: {nombre_usuario})"
-        await event.edit(mensaje_modificado)  # Edita el mensaje para incluir el equipo
+        # Buscar un hashtag seguido de un número en el mensaje enviado
+        match = re.search(r"#(\d+)\s+(.*)", event.message.text)  
+        if match:
+            equipo_numero = match.group(1)  # Número del hashtag
+            mensaje_original = match.group(2)  # Mensaje sin el hashtag
 
-    @client.on(events.NewMessage(incoming=True))  # Mensajes entrantes
+            # Buscar el nombre del empleado que responde
+            nombre_empleado = etiquetas_por_equipo.get(equipo_numero, "Empleado desconocido")
+
+            # Formatear el mensaje para incluir la referencia
+            mensaje_modificado = f"{mensaje_original} (respondió {nombre_empleado})"
+
+            # Editar el mensaje original
+            await event.edit(mensaje_modificado)
+
+    # Escuchar mensajes entrantes de clientes
+    @client.on(events.NewMessage(incoming=True))  
     async def handler_incoming(event):
         if event.is_private:
             sender = await event.get_sender()
@@ -88,19 +114,4 @@ async def main():
 
     await client.run_until_disconnected()
 
-# 🚀 Servidor FastAPI para UptimeRobot
-app = FastAPI()
-
-@app.get("/")
-def read_root():
-    return {"status": "Bot activo 🚀"}
-
-# Ejecutar el servidor en un hilo separado
-def run_server():
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
-server_thread = threading.Thread(target=run_server, daemon=True)
-server_thread.start()
-
-# Ejecutar el bot
 asyncio.run(main())
